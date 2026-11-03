@@ -4,3 +4,4 @@ scans*/
 dist/
 build/
 .coverage
+*.log

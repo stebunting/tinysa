@@ -1,6 +1,7 @@
 """Module to represent a TinySA connection."""
 
 import struct
+import logging
 from serial.tools import list_ports
 import serial
 import numpy as np
@@ -14,6 +15,7 @@ class TinySA:
     def __init__(self, dev = None):
         self.dev = dev or self.getport()
         self.serial: serial.Serial | None = None
+        logging.info("Got connection %s", self.dev)
 
     def getport(self) -> str:
         """Gets the TinySA port automatically."""
@@ -27,11 +29,13 @@ class TinySA:
         """Opens a connection to the device."""
         if self.serial is None:
             self.serial = serial.Serial(self.dev)
+            logging.info("Opened serial connection %s", self.serial)
 
     def close(self):
         """Closes the connection to the device."""
         if self.serial:
             self.serial.close()
+            logging.info("Closed serial connection")
         self.serial = None
 
     def send_command(self, cmd: str):
@@ -40,6 +44,7 @@ class TinySA:
         if self.serial:
             self.serial.write(cmd.encode())
             self.serial.readline()
+            logging.info("Command sent to TinySA: %s", cmd.encode())
 
     def cmd(self, text: str):
         """Sends a command to the device and returns data."""
@@ -47,6 +52,7 @@ class TinySA:
         if self.serial:
             self.serial.write((text + "\r").encode())
             self.serial.readline()
+            logging.info("Command sent to TinySA: %s", (text + "\r").encode())
             data = self.fetch_data()
             return data
         return None
@@ -60,10 +66,14 @@ class TinySA:
 
     def fetch_data(self):
         """Fetches raw data from the device."""
+        logging.info("Fetching data")
         result = ""
         line = ""
+        i: int = 1
+        raw_data: str = ""
         while self.serial:
             c = self.serial.read().decode("utf-8")
+            raw_data += c
             if c != chr(13):
                 line += c
                 if c == chr(10):
@@ -71,15 +81,20 @@ class TinySA:
                     line = ""
                 elif line.endswith("ch>"):
                     break
+            i += 1
+        logging.info("Data fetched (%d characters, %d lines): '%s'", \
+                     i, len(result.split("\n")), raw_data.replace("\n", "\\n").replace("\r", "\\r"))
         return result
 
     def resume(self):
         """Resumes the device."""
         self.send_command("resume\r")
+        logging.info("Device resumed")
 
     def pause(self):
         """Pauses the device."""
         self.send_command("pause\r")
+        logging.info("Device paused")
 
     def data(self, array: int = 2):
         """Fetches data from the device."""

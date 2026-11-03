@@ -2,11 +2,20 @@
 """Script to automatically collect RF scan data."""
 
 from argparse import ArgumentParser
+from datetime import date
+import logging
 import scan
 from tiny_sa import TinySA
 from util import format_time
 
 if __name__ == "__main__":
+    today = date.today()
+    logging.basicConfig(filename=f"log-{today.strftime("%Y%m%d")}.log", \
+                        format="%(asctime)s %(levelname)s:%(message)s", \
+                        datefmt="%Y-%m-%d %H:%M:%S", \
+                        level=logging.INFO)
+    logging.info("Script started")
+
     parser = ArgumentParser(prog="tinysa", description="Automated RF Scanning")
     parser.add_argument("-i", "--inside", action="store_true")
     parser.add_argument("-o", "--outside", action="store_true")
@@ -26,6 +35,7 @@ if __name__ == "__main__":
             print("")
         file_prefix = "IN_" if inside == "1" else "OUT_"
     print(f"FILE PREFIX: \"{file_prefix}\"")
+    logging.info("File Prefix Set: %s", file_prefix)
 
     if args.y:
         input("Extend the antenna to maximum. Press enter to continue.\a")
@@ -49,3 +59,4 @@ if __name__ == "__main__":
 
     print("Scan Complete")
     print(f"Complete in {format_time(running_time)}")
+    logging.info("Scan complete in %s", format_time(running_time))

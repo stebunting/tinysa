@@ -1,6 +1,7 @@
 """Module for scanning functions"""
 
 import time
+import logging
 from file_util import File
 from tiny_sa import TinySA
 from util import format_time, hz_to_mhz, mhz_to_hz
@@ -15,23 +16,27 @@ def _section(f1: int, f2: int, points: int, averages: int, device: TinySA) -> Da
     device.send_command("calc off\r")
     device.resume()
 
-    print(f"{hz_to_mhz(f1):.3f}MHz - {hz_to_mhz(f2):.3f}MHz", end="", flush=True)
+    message: str = f"{hz_to_mhz(f1):.3f}MHz - {hz_to_mhz(f2):.3f}MHz"
+    print(message, end="", flush=True)
+    logging.info("Scanning %s with %d averages", message, averages)
 
     raw_data: list[list[float]] = [[] for _ in range(points)]
-    for _ in range(averages):
+    for i in range(averages):
+        logging.info("Scanning %s: average #%d", message, i + 1)
         lines = device.scan(f1, f2, points)
         for i in range(points):
             try:
                 raw_data[i].append(float(lines[i]))
             except ValueError:
                 # Level data is not valid float
-                pass
+                logging.error("Invalid level received from TinySA: %d // %s", i, lines[i])
         print(".", end="", flush=True)
 
     frequencies: list[int] = device.fetch_frequencies()
     levels: list[float] = [sum(raw_data[i]) / len(raw_data[i]) for i in range(len(raw_data))]
 
     print(f"OK ({format_time(time.time() - func_start_time)})")
+    logging.info("Scan complete")
     return [(frequencies[i], levels[i]) for i in range(points)]
 
 def detailed(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
@@ -57,6 +62,7 @@ def detailed(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
 
     t: float = time.time() - func_start_time
     print(f"{fp.filename()} written. Complete in {format_time(t)}")
+    logging.info("Scan complete")
     return t
 
 def coarse(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
@@ -71,6 +77,7 @@ def coarse(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
 
     t: float = time.time() - func_start_time
     print(f"{fp.filename()} written. Complete in {format_time(t)}")
+    logging.info("Scan complete")
     return t
 
 def wifi(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
@@ -100,4 +107,5 @@ def wifi(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
     t: float = time.time() - func_start_time
     print(f"OK ({format_time(t)})")
     print(f"{filename}.jpg written. Complete in {format_time(t)}")
+    logging.info("Scan complete")
     return t
