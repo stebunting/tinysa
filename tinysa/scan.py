@@ -1,5 +1,6 @@
 """Module for scanning functions"""
 
+import sys
 import time
 import logging
 
@@ -25,6 +26,13 @@ def _section(f1: int, f2: int, points: int, averages: int, device: TinySA) -> Da
     for i in range(averages):
         logging.info("Scanning %s: average #%d", message, i + 1)
         lines = device.scan(f1, f2, points)
+
+        if len(lines) < points:
+            not_ok: str = "x" if sys.platform.startswith("win") else "✗"
+            util.print_coloured(util.Colour.RED, not_ok)
+            device.abort()
+            continue
+
         for i in range(points):
             try:
                 raw_data[i].append(float(lines[i]))
@@ -36,7 +44,9 @@ def _section(f1: int, f2: int, points: int, averages: int, device: TinySA) -> Da
     frequencies: list[int] = device.fetch_frequencies()
     levels: list[float] = [sum(raw_data[i]) / len(raw_data[i]) for i in range(len(raw_data))]
 
-    print(f"OK ({util.format_time(time.time() - func_start_time)})")
+    ok: str = "OK" if sys.platform.startswith("win") else "✓"
+    util.print_coloured(util.Colour.GREEN, f"{ok} ")
+    print(f"({util.format_time(time.time() - func_start_time)})")
     logging.info("Scan complete")
     return [(frequencies[i], levels[i]) for i in range(points)]
 
