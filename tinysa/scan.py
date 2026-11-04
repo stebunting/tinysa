@@ -89,21 +89,23 @@ def wifi(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
     f2: int = util.mhz_to_hz(f2_mhz)
     averages: int  = 4
 
+    fp = File(f"{filename}.jpg")
+
     print(f"{util.hz_to_mhz(f1):.3f}MHz - {util.hz_to_mhz(f2):.3f}MHz", end="", flush=True)
 
     device.send_command(f"sweep start {f1}\r")
     device.send_command(f"sweep stop {f2}\r")
+    device.send_command("marker 1 off\r")
     device.send_command("calc maxh\r")
-    device.resume()
 
     for _ in range(averages):
-        time.sleep(21.5)
+        time.sleep(21)
         print(".", end="", flush=True)
 
     img = device.capture()
     if img is not None:
         jpg = img.convert('RGB')
-        jpg.save(f"{filename}.jpg")
+        fp.image_dump(jpg)
 
     t: float = time.time() - func_start_time
     print(f"OK ({util.format_time(t)})")

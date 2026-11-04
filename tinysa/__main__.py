@@ -55,7 +55,11 @@ if __name__ == "__main__":
         input("Shorten the antenna to minimum. Press enter to continue.\a")
     running_time += scan.coarse(f"{file_prefix}DEUR", 1880, 1900, tsa)
 
-    running_time += scan.wifi("2400MHz", 2400, 2500, tsa)
+    WIFI: str = ""
+    while WIFI.upper() not in ("Y", "N"):
+        WIFI = input("Would you like to capture a WiFi Scan (y/n): \a")
+    if WIFI.upper() == "Y":
+        running_time += scan.wifi("2400MHz", 2400, 2500, tsa)
 
     print("Scan Complete")
     print(f"Complete in {util.format_time(running_time)}")
