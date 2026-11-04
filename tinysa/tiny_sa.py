@@ -9,8 +9,8 @@ from PIL import Image
 
 class TinySA:
     """Class to represent a TinySA connection."""
-    VID = 0x0483 #1155
-    PID = 0x5740 #22336
+    VID: int = 0x0483 #1155
+    PID: int = 0x5740 #22336
 
     def __init__(self, dev = None):
         self.dev = dev or self.getport()
@@ -25,20 +25,20 @@ class TinySA:
                 return device.device
         raise OSError("device not found")
 
-    def open(self):
+    def open(self) -> None:
         """Opens a connection to the device."""
         if self.serial is None:
             self.serial = serial.Serial(self.dev)
             logging.info("Opened serial connection %s", self.serial)
 
-    def close(self):
+    def close(self) -> None:
         """Closes the connection to the device."""
         if self.serial:
             self.serial.close()
             logging.info("Closed serial connection")
         self.serial = None
 
-    def send_command(self, cmd: str):
+    def send_command(self, cmd: str) -> None:
         """Sends a command to the device."""
         self.open()
         if self.serial:
@@ -46,40 +46,40 @@ class TinySA:
             self.serial.readline()
             logging.info("Command sent to TinySA: %s", cmd.encode())
 
-    def resume(self):
+    def resume(self) -> None:
         """Resumes the device."""
         self.send_command("resume\r")
         logging.info("Device resumed")
 
-    def pause(self):
+    def pause(self) -> None:
         """Pauses the device."""
         self.send_command("pause\r")
         logging.info("Device paused")
 
-    def rbw(self, data = 0):
+    def rbw(self, data = 0) -> None:
         """Sends a command to the device to set the RBW."""
         if data == 0:
             self.send_command("rbw auto\r")
         else:
             self.send_command(f"rbw {data}\r")
 
-    def send_scan(self, start: int, stop: int, points: int | None = None):
+    def send_scan(self, start: int, stop: int, points: int | None = None) -> None:
         """Sends a scan command to the device."""
         if points:
             self.send_command(f"scan {start} {stop} {points}\r")
         else:
             self.send_command(f"scan {start} {stop}\r")
 
-    def scan(self, f1: int, f2: int, points: int):
+    def scan(self, f1: int, f2: int, points: int) -> list[str]:
         """Starts a scan and returns data."""
         self.send_scan(f1, f2, points)
         return self.data()
 
-    def fetch_data(self):
+    def fetch_data(self) -> str:
         """Fetches raw data from the device."""
         logging.info("Fetching data")
-        result = ""
-        line = ""
+        result: str = ""
+        line: str = ""
         i: int = 1
         raw_data: str = ""
         while self.serial:
@@ -97,7 +97,7 @@ class TinySA:
                      i, len(result.split("\n")), raw_data.replace("\n", "\\n").replace("\r", "\\r"))
         return result
 
-    def data(self, array: int = 2):
+    def data(self, array: int = 2) -> list[str]:
         """Fetches data from the device."""
         self.send_command(f"data {array}\r")
         data = self.fetch_data()
