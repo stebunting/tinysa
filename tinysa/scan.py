@@ -2,9 +2,10 @@
 
 import time
 import logging
-from file_util import File
+
 from tiny_sa import TinySA
-from util import format_time, hz_to_mhz, mhz_to_hz
+from file import File
+import util
 
 type Data = list[tuple[int, float | None]]
 
@@ -16,7 +17,7 @@ def _section(f1: int, f2: int, points: int, averages: int, device: TinySA) -> Da
     device.send_command("calc off\r")
     device.resume()
 
-    message: str = f"{hz_to_mhz(f1):.3f}MHz - {hz_to_mhz(f2):.3f}MHz"
+    message: str = f"{util.hz_to_mhz(f1):.3f}MHz - {util.hz_to_mhz(f2):.3f}MHz"
     print(message, end="", flush=True)
     logging.info("Scanning %s with %d averages", message, averages)
 
@@ -35,7 +36,7 @@ def _section(f1: int, f2: int, points: int, averages: int, device: TinySA) -> Da
     frequencies: list[int] = device.fetch_frequencies()
     levels: list[float] = [sum(raw_data[i]) / len(raw_data[i]) for i in range(len(raw_data))]
 
-    print(f"OK ({format_time(time.time() - func_start_time)})")
+    print(f"OK ({util.format_time(time.time() - func_start_time)})")
     logging.info("Scan complete")
     return [(frequencies[i], levels[i]) for i in range(points)]
 
@@ -45,8 +46,8 @@ def detailed(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
 
     fp: File = File(filename)
 
-    f1: int = mhz_to_hz(f1_mhz)
-    f2: int = mhz_to_hz(f2_mhz)
+    f1: int = util.mhz_to_hz(f1_mhz)
+    f2: int = util.mhz_to_hz(f2_mhz)
 
     step: int = 25000
     max_points: int = 450
@@ -61,7 +62,7 @@ def detailed(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
         i += 1
 
     t: float = time.time() - func_start_time
-    print(f"{fp.filename()} written. Complete in {format_time(t)}")
+    print(f"{fp.filename()} written. Complete in {util.format_time(t)}")
     logging.info("Scan complete")
     return t
 
@@ -69,14 +70,14 @@ def coarse(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
     """Method to take a single scan between 2 frequencies"""
     func_start_time: float = time.time()
 
-    f1: int = mhz_to_hz(f1_mhz)
-    f2: int = mhz_to_hz(f2_mhz)
+    f1: int = util.mhz_to_hz(f1_mhz)
+    f2: int = util.mhz_to_hz(f2_mhz)
 
     fp = File(filename)
     fp.write(_section(f1, f2, 450, 6, device))
 
     t: float = time.time() - func_start_time
-    print(f"{fp.filename()} written. Complete in {format_time(t)}")
+    print(f"{fp.filename()} written. Complete in {util.format_time(t)}")
     logging.info("Scan complete")
     return t
 
@@ -84,11 +85,11 @@ def wifi(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
     """Method to take a WiFi scan and capture to an image file"""
     func_start_time: float = time.time()
 
-    f1: int = mhz_to_hz(f1_mhz)
-    f2: int = mhz_to_hz(f2_mhz)
+    f1: int = util.mhz_to_hz(f1_mhz)
+    f2: int = util.mhz_to_hz(f2_mhz)
     averages: int  = 4
 
-    print(f"{hz_to_mhz(f1):.3f}MHz - {hz_to_mhz(f2):.3f}MHz", end="", flush=True)
+    print(f"{util.hz_to_mhz(f1):.3f}MHz - {util.hz_to_mhz(f2):.3f}MHz", end="", flush=True)
 
     device.send_command(f"sweep start {f1}\r")
     device.send_command(f"sweep stop {f2}\r")
@@ -105,7 +106,7 @@ def wifi(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
         jpg.save(f"{filename}.jpg")
 
     t: float = time.time() - func_start_time
-    print(f"OK ({format_time(t)})")
-    print(f"{filename}.jpg written. Complete in {format_time(t)}")
+    print(f"OK ({util.format_time(t)})")
+    print(f"{filename}.jpg written. Complete in {util.format_time(t)}")
     logging.info("Scan complete")
     return t

@@ -2,7 +2,8 @@
 
 import os
 from datetime import date
-from util import hz_to_mhz
+
+import util
 
 type Data = list[tuple[int, float | None]]
 
@@ -27,13 +28,13 @@ class File:
         """Method to append to a scan csv file"""
         with open(self._path, "a", encoding="utf-8") as fp:
             for _, (freq, level) in enumerate(data):
-                print(f"{hz_to_mhz(freq):.3f};{level:2.2f}", file=fp)
+                print(f"{util.hz_to_mhz(freq):.3f};{level:2.2f}", file=fp)
 
     def write(self, data: Data) -> None:
         """Method to write a scan csv file"""
         with open(self._path, "w", encoding="utf-8") as fp:
             for _, (freq, level) in enumerate(data):
-                print(f"{hz_to_mhz(freq):.3f};{level:2.2f}", file=fp)
+                print(f"{util.hz_to_mhz(freq):.3f};{level:2.2f}", file=fp)
 
     def filename(self) -> str:
         """Method to return the filename"""

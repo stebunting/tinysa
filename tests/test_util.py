@@ -2,6 +2,7 @@
 
 import unittest
 from typing import TypedDict
+
 import util
 
 class TestOutput(unittest.TestCase):

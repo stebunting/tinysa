@@ -46,16 +46,15 @@ class TinySA:
             self.serial.readline()
             logging.info("Command sent to TinySA: %s", cmd.encode())
 
-    def cmd(self, text: str):
-        """Sends a command to the device and returns data."""
-        self.open()
-        if self.serial:
-            self.serial.write((text + "\r").encode())
-            self.serial.readline()
-            logging.info("Command sent to TinySA: %s", (text + "\r").encode())
-            data = self.fetch_data()
-            return data
-        return None
+    def resume(self):
+        """Resumes the device."""
+        self.send_command("resume\r")
+        logging.info("Device resumed")
+
+    def pause(self):
+        """Pauses the device."""
+        self.send_command("pause\r")
+        logging.info("Device paused")
 
     def rbw(self, data = 0):
         """Sends a command to the device to set the RBW."""
@@ -63,6 +62,18 @@ class TinySA:
             self.send_command("rbw auto\r")
         else:
             self.send_command(f"rbw {data}\r")
+
+    def send_scan(self, start: int, stop: int, points: int | None = None):
+        """Sends a scan command to the device."""
+        if points:
+            self.send_command(f"scan {start} {stop} {points}\r")
+        else:
+            self.send_command(f"scan {start} {stop}\r")
+
+    def scan(self, f1: int, f2: int, points: int):
+        """Starts a scan and returns data."""
+        self.send_scan(f1, f2, points)
+        return self.data()
 
     def fetch_data(self):
         """Fetches raw data from the device."""
@@ -86,16 +97,6 @@ class TinySA:
                      i, len(result.split("\n")), raw_data.replace("\n", "\\n").replace("\r", "\\r"))
         return result
 
-    def resume(self):
-        """Resumes the device."""
-        self.send_command("resume\r")
-        logging.info("Device resumed")
-
-    def pause(self):
-        """Pauses the device."""
-        self.send_command("pause\r")
-        logging.info("Device paused")
-
     def data(self, array: int = 2):
         """Fetches data from the device."""
         self.send_command(f"data {array}\r")
@@ -111,18 +112,6 @@ class TinySA:
             if line:
                 frequencies.append(float(line))
         return frequencies
-
-    def send_scan(self, start: int, stop: int, points: int | None = None):
-        """Sends a scan command to the device."""
-        if points:
-            self.send_command(f"scan {start} {stop} {points}\r")
-        else:
-            self.send_command(f"scan {start} {stop}\r")
-
-    def scan(self, f1: int, f2: int, points: int):
-        """Starts a scan and returns data."""
-        self.send_scan(f1, f2, points)
-        return self.data()
 
     def capture(self):
         """Captures a screenshot of the device."""

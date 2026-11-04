@@ -1,12 +1,12 @@
-#!/opt/homebrew/share/man/man1/python3.1
 """Script to automatically collect RF scan data."""
 
 from argparse import ArgumentParser
 from datetime import date
 import logging
-import scan
+
 from tiny_sa import TinySA
-from util import format_time
+import scan
+import util
 
 if __name__ == "__main__":
     today = date.today()
@@ -58,5 +58,5 @@ if __name__ == "__main__":
     running_time += scan.wifi("2400MHz", 2400, 2500, tsa)
 
     print("Scan Complete")
-    print(f"Complete in {format_time(running_time)}")
-    logging.info("Scan complete in %s", format_time(running_time))
+    print(f"Complete in {util.format_time(running_time)}")
+    logging.info("Scan complete in %s", util.format_time(running_time))
