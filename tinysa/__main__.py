@@ -34,6 +34,15 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--prompt", action="store_false")
     args = parser.parse_args()
 
+    print()
+    print("************************************")
+    print("***                              ***")
+    print("*** TINY-SA AUTOMATED RF SCANNER ***")
+    print("***      by Stephen Bunting      ***")
+    print("***                              ***")
+    print("************************************")
+    print()
+
     file_prefix: str = "IN_" if args.inside else ("OUT_" if args.outside else "")
     prompt: bool = args.prompt
 
