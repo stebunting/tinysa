@@ -39,6 +39,7 @@ if __name__ == "__main__":
     running_time: float = 0
 
     tsa: TinySA = TinySA()
+    tsa.resume()
 
     if file_prefix == "":
         inside: str = "start"

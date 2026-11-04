@@ -16,7 +16,6 @@ def _section(f1: int, f2: int, points: int, averages: int, device: TinySA) -> Da
 
     device.rbw(30)
     device.send_command("calc off\r")
-    device.resume()
 
     message: str = f"{util.hz_to_mhz(f1):.3f}MHz - {util.hz_to_mhz(f2):.3f}MHz"
     print(message, end="", flush=True)
@@ -74,6 +73,7 @@ def detailed(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
     t: float = time.time() - func_start_time
     print(f"{fp.filename()} written. Complete in {util.format_time(t)}")
     logging.info("Scan complete")
+    device.resume()
     return t
 
 def coarse(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
@@ -89,6 +89,7 @@ def coarse(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:
     t: float = time.time() - func_start_time
     print(f"{fp.filename()} written. Complete in {util.format_time(t)}")
     logging.info("Scan complete")
+    device.resume()
     return t
 
 def wifi(filename: str, f1_mhz: int, f2_mhz: int, device: TinySA) -> float:

@@ -81,7 +81,7 @@ class TinySA:
     def scan(self, f1: int, f2: int, points: int) -> list[str]:
         """Starts a scan and returns data."""
         self.send_scan(f1, f2, points)
-        return self.data()
+        return self.data(0)
 
     def fetch_data(self) -> str:
         """Fetches raw data from the device."""
@@ -105,7 +105,7 @@ class TinySA:
                      i, len(result.split("\n")), raw_data.replace("\n", "\\n").replace("\r", "\\r"))
         return result
 
-    def data(self, array: int = 2) -> list[str]:
+    def data(self, array: int = 0) -> list[str]:
         """Fetches data from the device."""
         self.send_command(f"data {array}\r")
         data = self.fetch_data()
