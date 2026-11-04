@@ -23,6 +23,7 @@ class TinySA:
         for device in device_list:
             if device.vid == self.VID and device.pid == self.PID:
                 return device.device
+        logging.error("Could not connect to device")
         raise OSError("device not found")
 
     def open(self) -> None:

@@ -14,7 +14,8 @@ if __name__ == "__main__":
     def _signal_handler(_sig, _frame):
         """SIGINT Handler"""
         logging.info("Ctrl-C!")
-        tsa.abort()
+        if tsa is not None:
+            tsa.abort()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, _signal_handler)
@@ -38,7 +39,17 @@ if __name__ == "__main__":
 
     running_time: float = 0
 
-    tsa: TinySA = TinySA()
+    tsa: TinySA | None = None
+    QUIT: str = ""
+    while tsa is None and QUIT.upper() != "X":
+        try:
+            tsa = TinySA()
+        except OSError:
+            QUIT = input("TinySA not plugged in. Press enter to retry or x to quit: ")
+        if QUIT.upper() == "X":
+            sys.exit(0)
+
+    assert tsa is not None
     tsa.resume()
 
     if file_prefix == "":
