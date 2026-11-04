@@ -30,9 +30,11 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--inside", action="store_true")
     parser.add_argument("-o", "--outside", action="store_true")
     parser.add_argument("-y", action="store_false")
+    parser.add_argument("-p", "--prompt", action="store_false")
     args = parser.parse_args()
 
     file_prefix: str = "IN_" if args.inside else ("OUT_" if args.outside else "")
+    prompt: bool = args.prompt
 
     running_time: float = 0
 
@@ -40,9 +42,9 @@ if __name__ == "__main__":
 
     if file_prefix == "":
         inside: str = "start"
-        while inside.strip()[0] != "1" and inside.strip()[0] != "2":
+        while len(inside) == 0 or (inside.strip()[0] != "1" and inside.strip()[0] != "2"):
             inside = input("1: Inside\n2: Outside\nIs this scan inside or outside? ")
-            print("")
+            print()
         file_prefix = "IN_" if inside == "1" else "OUT_"
     print(f"FILE PREFIX: \"{file_prefix}\"")
     logging.info("File Prefix Set: %s", file_prefix)
