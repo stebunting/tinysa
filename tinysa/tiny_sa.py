@@ -56,6 +56,14 @@ class TinySA:
         self.send_command("pause\r")
         logging.info("Device paused")
 
+    def abort(self) -> None:
+        """Abort current command and make device ready again"""
+        self.pause()
+        self.send_command("abort on\r")
+        self.send_command("abort\r")
+        self.send_command("abort off\r")
+        self.resume()
+
     def rbw(self, data = 0) -> None:
         """Sends a command to the device to set the RBW."""
         if data == 0:

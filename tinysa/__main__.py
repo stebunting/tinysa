@@ -2,6 +2,8 @@
 
 from argparse import ArgumentParser
 from datetime import date
+import signal
+import sys
 import logging
 
 from tiny_sa import TinySA
@@ -9,6 +11,14 @@ import scan
 import util
 
 if __name__ == "__main__":
+    def _signal_handler(_sig, _frame):
+        """SIGINT Handler"""
+        logging.info("Ctrl-C!")
+        tsa.abort()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, _signal_handler)
+
     today = date.today()
     logging.basicConfig(filename=f"log-{today.strftime("%Y%m%d")}.log", \
                         format="%(asctime)s %(levelname)s:%(message)s", \
