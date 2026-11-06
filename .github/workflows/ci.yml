@@ -43,7 +43,7 @@ jobs:
 
     needs: test
 
-    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    if: github.ref == 'refs/heads/production' || (github.ref_type == 'tag' && startsWith(github.ref_name, 'v'))
 
     runs-on: macos-latest
 
@@ -76,6 +76,8 @@ jobs:
 
     needs: test
 
+    if: github.ref == 'refs/heads/production' || (github.ref_type == 'tag' && startsWith(github.ref_name, 'v'))
+
     runs-on: windows-latest
 
     steps:
@@ -101,3 +103,30 @@ jobs:
           name: tinysa-win
           path: dist/tinysa.exe
           retention-days: 7
+
+  deploy:
+    name: Deploy
+
+    needs: [build-osx, build-win]
+
+    if: github.ref == 'refs/heads/production' || (github.ref_type == 'tag' && startsWith(github.ref_name, 'v'))
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v8
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to AWS S3
+        run: |
+          aws s3 cp tinysa-osx/tinysa s3://${{ secrets.AWS_S3_BUCKET_NAME }}/tinysa-osx-${GITHUB_REF_NAME#v}
+          aws s3 cp tinysa-win/tinysa.exe s3://${{ secrets.AWS_S3_BUCKET_NAME }}/tinysa-win-${GITHUB_REF_NAME#v}.exe
